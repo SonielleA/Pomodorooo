@@ -3,41 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aesthetic Pomodoro</title>
+  <title>Notion Pomodoro Widget</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --white: #ffffff;
       --black: #000000;
-      --overlay: rgba(0, 0, 0, 0.35);
-      --glass: rgba(255, 255, 255, 0.12);
-      --glass-hover: rgba(255, 255, 255, 0.2);
-    }
-
-    [data-theme="dark"] {
-      --overlay: rgba(0, 0, 0, 0.6);
+      --overlay: rgba(0, 0, 0, 0.4);
+      --glass: rgba(255, 255, 255, 0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--black);
+      background: transparent;
       font-family: 'Inter', sans-serif;
       height: 100vh;
-      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
+      /* This allows the widget to respond to its own size */
+      container-type: inline-size;
     }
 
-    /* Background with Ken Burns-ish transition */
     .widget-container {
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
+      inset: 0;
       background-size: cover;
       background-position: center;
-      transition: background-image 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 0;
+      transition: background-image 1s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .widget-container::before {
@@ -45,7 +44,7 @@
       position: absolute;
       inset: 0;
       background: var(--overlay);
-      transition: background 0.5s ease;
+      z-index: 1;
     }
 
     .content-wrapper {
@@ -53,128 +52,96 @@
       z-index: 10;
       text-align: center;
       color: var(--white);
-      max-width: 600px;
       width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5cqh; /* Scales gap based on container height */
     }
 
-    /* Mode Buttons - Glassmorphism style */
+    /* SCALEABLE TYPOGRAPHY */
+    #pomodoro-timer {
+      /* Scales from 40px to 120px based on widget width */
+      font-size: clamp(40px, 25cqw, 120px); 
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
     .mode-row {
       display: flex;
       justify-content: center;
-      gap: 12px;
-      margin-bottom: 30px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .mode-btn {
       background: var(--glass);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--white);
-      padding: 8px 20px;
-      border-radius: 40px;
-      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: clamp(10px, 3cqw, 13px);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.2s;
     }
-
-    .mode-btn:hover { background: var(--glass-hover); }
 
     .mode-btn.active {
       background: var(--white);
       color: var(--black);
-      border-color: var(--white);
     }
 
-    /* Timer - High Impact */
-    #pomodoro-timer {
-      font-size: clamp(100px, 20vw, 160px); /* Fluid typography */
-      font-weight: 800;
-      letter-spacing: -0.06em;
-      line-height: 0.9;
-      margin-bottom: 40px;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      font-variant-numeric: tabular-nums; /* Prevents jumping numbers */
-    }
-
-    /* Actions */
     .actions {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 25px;
+      gap: 15px;
+      margin-top: 10px;
     }
 
     #start-btn {
       background: var(--white);
       color: var(--black);
       border: none;
-      padding: 18px 50px;
-      border-radius: 50px;
+      padding: 10px 30px;
+      border-radius: 40px;
       font-weight: 700;
-      font-size: 18px;
+      font-size: clamp(12px, 4cqw, 16px);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
       cursor: pointer;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    #start-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-    }
-
-    #start-btn:active { transform: translateY(0); }
 
     .icon-btn {
       background: var(--glass);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--white);
-      width: 55px;
-      height: 55px;
+      width: clamp(35px, 10cqw, 45px);
+      height: clamp(35px, 10cqw, 45px);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
       cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
     }
 
-    .icon-btn:hover {
-      background: var(--white);
-      color: var(--black);
-      transform: rotate(45deg);
-    }
-
-    /* Next Image Button */
     .theme-toggle {
       position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.2);
+      bottom: 15px;
+      background: rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: rgba(255, 255, 255, 0.6);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .theme-toggle:hover {
-      background: rgba(0, 0, 0, 0.4);
-      color: var(--white);
-      border-color: rgba(255, 255, 255, 0.3);
+      z-index: 20;
     }
   </style>
 </head>
@@ -184,49 +151,37 @@
 
 <div class="content-wrapper">
   <div class="mode-row">
-    <button class="mode-btn active" onclick="setTimer(25, this)">Pomodoro</button>
-    <button class="mode-btn" onclick="setTimer(5, this)">Short Break</button>
-    <button class="mode-btn" onclick="setTimer(15, this)">Long Break</button>
+    <button class="mode-btn active" onclick="setTimer(25, this)">Pomo</button>
+    <button class="mode-btn" onclick="setTimer(5, this)">Short</button>
+    <button class="mode-btn" onclick="setTimer(15, this)">Long</button>
   </div>
 
   <div id="pomodoro-timer">25:00</div>
 
   <div class="actions">
     <button id="start-btn" onclick="toggleTimer()">Start</button>
-    <button class="icon-btn" onclick="resetTimer()" title="Reset Timer">↻</button>
+    <button class="icon-btn" onclick="resetTimer()">↻</button>
   </div>
 </div>
 
-<button class="theme-toggle" id="theme-btn">Next Image / Mode</button>
+<button class="theme-toggle" id="theme-btn" onclick="nextImage()">Next BG</button>
 
 <script>
   const images = [
     'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?q=80&w=2560',
     'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2560',
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560',
-    'https://images.unsplash.com/photo-1501854140801-50d01674aa3e?q=80&w=2560'
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560'
   ];
   
   let currentImgIndex = 0;
   const bgContainer = document.getElementById('bg-container');
-  const themeBtn = document.getElementById('theme-btn');
-
-  // Preload images to prevent white flash
-  images.forEach(src => { const img = new Image(); img.src = src; });
-  
   bgContainer.style.backgroundImage = `url('${images[currentImgIndex]}')`;
 
-  themeBtn.onclick = () => {
-    // 1. Toggle Theme Data Attribute
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-
-    // 2. Smooth Image Change
+  function nextImage() {
     currentImgIndex = (currentImgIndex + 1) % images.length;
     bgContainer.style.backgroundImage = `url('${images[currentImgIndex]}')`;
-  };
+  }
 
-  // --- Timer Logic ---
   let defaultMins = 25;
   let timeLeft = defaultMins * 60;
   let timerId = null;
@@ -238,16 +193,11 @@
     const mins = Math.floor(timeLeft / 60);
     const secs = timeLeft % 60;
     display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-    document.title = `${display.textContent} - Focus`;
   }
 
   function setTimer(mins, btn) {
     defaultMins = mins;
-    clearInterval(timerId);
-    isRunning = false;
-    startBtn.textContent = 'Start';
-    timeLeft = mins * 60;
-    updateDisplay();
+    resetTimer();
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
@@ -263,7 +213,6 @@
           updateDisplay();
         } else {
           clearInterval(timerId);
-          new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => {});
           alert("Time's up!");
         }
       }, 1000);
