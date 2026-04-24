@@ -1,0 +1,169 @@
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+
+<style>
+/* --- WIDGET GLOBAL THEME --- */
+:root {
+  --bg-page: #faf9f6;
+  --bg-widget: #ffffff;
+  --text-main: #1a1a1a;
+  --text-dim: #999999;
+  --border: #888888;
+  --accent: #8e9775;
+  --hover: #f5f5f5;
+}
+
+[data-theme="dark"] {
+  --bg-page: #121212;
+  --bg-widget: #1e1e1e;
+  --text-main: #f0f0f0;
+  --text-dim: #777777;
+  --border: #555555;
+  --hover: #2a2a2a;
+}
+
+body {
+  background-color: var(--bg-page);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* --- REUSABLE CARD STYLE --- */
+.widget-container {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-widget);
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* --- TYPOGRAPHY SYSTEM --- */
+.font-serif {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.font-sans-dim {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: 12px;
+  margin-top: 1rem;
+}
+
+.font-sans-bold {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+}
+
+/* --- COMPACT BUTTON STYLE --- */
+.btn-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: 0.2s;
+  margin: 5px;
+}
+
+.btn-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text-main);
+  background: var(--hover);
+}
+
+.btn-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.timer-display {
+  font-size: 48px;
+  margin: 1rem 0;
+}
+</style>
+
+<div class="widget-container">
+  <div id="timer-label" class="font-serif">Focus Time</div>
+  
+  <div id="timer-display" class="font-sans-bold timer-display">25:00</div>
+  
+  <div class="controls">
+    <button class="btn-toggle" id="start-btn">Start</button>
+    <button class="btn-toggle" id="reset-btn">Reset</button>
+  </div>
+
+  <div class="modes" style="margin-top: 15px;">
+    <button class="btn-toggle btn-active" onclick="setTimer(25, 'Focus Time')">Focus</button>
+    <button class="btn-toggle" onclick="setTimer(5, 'Short Break')">Short</button>
+    <button class="btn-toggle" onclick="setTimer(15, 'Long Break')">Long</button>
+  </div>
+
+  <div class="font-sans-dim" id="date-display">April 24</div>
+</div>
+
+<script>
+  let timeLeft = 25 * 60;
+  let timerId = null;
+  const display = document.getElementById('timer-display');
+  const label = document.getElementById('timer-label');
+  const startBtn = document.getElementById('start-btn');
+
+  function updateDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function setTimer(minutes, modeLabel) {
+    clearInterval(timerId);
+    timerId = null;
+    startBtn.textContent = "Start";
+    timeLeft = minutes * 60;
+    label.textContent = modeLabel;
+    updateDisplay();
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+      startBtn.textContent = "Start";
+    } else {
+      startBtn.textContent = "Pause";
+      timerId = setInterval(() => {
+        timeLeft--;
+        updateDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          alert("Time's up!");
+        }
+      }, 1000);
+    }
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    setTimer(25, 'Focus Time');
+  });
+
+  // Set current date
+  const options = { month: 'long', day: 'numeric' };
+  document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', options);
+</script>
