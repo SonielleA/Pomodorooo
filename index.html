@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sharp Aesthetic Pomodoro</title>
+  <title>HD Aesthetic Pomodoro</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --white: #ffffff;
       --black: #000000;
-      --overlay: rgba(0, 0, 0, 0.45); /* Slightly darker for better text contrast */
-      --glass: rgba(255, 255, 255, 0.15);
+      --overlay: rgba(0, 0, 0, 0.35);
+      --glass: rgba(255, 255, 255, 0.18);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #000;
+      background: #1a1a1a;
       font-family: 'Inter', sans-serif;
       height: 100vh;
       display: flex;
@@ -26,21 +26,19 @@
       container-type: inline-size;
     }
 
-    /* THE QUALITY FIX: Background Layer */
     .widget-container {
       position: absolute;
-      inset: -10px; /* Slight offset to prevent white edges when blurring */
+      inset: 0;
       background-size: cover;
       background-position: center;
-      transition: background-image 1s ease;
-      
-      /* This hides pixelation in low-res images */
-      filter: blur(4px); 
-      -webkit-filter: blur(4px);
-      transform: scale(1.05); /* Zoom slightly so blur doesn't show edges */
+      transition: background-image 0.8s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    /* Dark Overlay for Readability */
+    /* Subtle overlay to make text pop against HD backgrounds */
     .widget-container::before {
       content: '';
       position: absolute;
@@ -57,44 +55,44 @@
       width: 90%;
       display: flex;
       flex-direction: column;
-      gap: 1.5cqh;
+      gap: 1.2cqh;
     }
 
-    /* TIMER TEXT - Always Sharp */
     #pomodoro-timer {
-      font-size: clamp(40px, 25cqw, 120px); 
+      font-size: clamp(45px, 28cqw, 130px); 
       font-weight: 800;
-      letter-spacing: -0.05em;
-      line-height: 1;
+      letter-spacing: -0.06em;
+      line-height: 0.9;
       font-variant-numeric: tabular-nums;
-      text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
     .mode-row {
       display: flex;
       justify-content: center;
       gap: 8px;
-      flex-wrap: wrap;
+      margin-bottom: 5px;
     }
 
     .mode-btn {
       background: var(--glass);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--white);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: clamp(10px, 3cqw, 13px);
+      font-size: clamp(10px, 3.5cqw, 14px);
       font-weight: 600;
       text-transform: uppercase;
       cursor: pointer;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
 
     .mode-btn.active {
       background: var(--white);
       color: var(--black);
+      transform: scale(1.05);
     }
 
     .actions {
@@ -102,47 +100,51 @@
       align-items: center;
       justify-content: center;
       gap: 15px;
-      margin-top: 10px;
+      margin-top: 15px;
     }
 
     #start-btn {
       background: var(--white);
       color: var(--black);
       border: none;
-      padding: 10px 30px;
-      border-radius: 40px;
-      font-weight: 700;
-      font-size: clamp(12px, 4cqw, 16px);
+      padding: 12px 35px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: clamp(13px, 4.5cqw, 18px);
       text-transform: uppercase;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .icon-btn {
       background: var(--glass);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--white);
-      width: clamp(35px, 10cqw, 45px);
-      height: clamp(35px, 10cqw, 45px);
+      width: clamp(38px, 11cqw, 48px);
+      height: clamp(38px, 11cqw, 48px);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease;
     }
+
+    .icon-btn:hover { transform: rotate(180deg); }
 
     .theme-toggle {
       position: absolute;
       bottom: 20px;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #fff;
+      color: rgba(255, 255, 255, 0.7);
       padding: 6px 15px;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 1px;
       cursor: pointer;
       z-index: 20;
     }
@@ -170,15 +172,13 @@
 <button class="theme-toggle" id="theme-btn" onclick="nextImage()">Next Background</button>
 
 <script>
+  // High-Resolution Curated Collection
   const images = [
-    'https://i.postimg.cc/TYdjG7vX/9436360760a3dad98fa314735315ccc4.jpg',
-    'https://i.postimg.cc/SNSLqTbN/download.jpg',
-    'https://i.postimg.cc/WdMtKThD/download-1.jpg',
-    'https://i.postimg.cc/WdMtKThF/download-2.jpg',
-    'https://i.postimg.cc/K1n4VxR3/download-3.jpg',
-    'https://i.postimg.cc/DSqmDn88/image.jpg',
-    'https://i.postimg.cc/MnyX4qvj/shgdb.jpg',
-    'https://i.postimg.cc/HsY0HZ1Y/fc3071b2bb7d6bbc216b31f0dd534d2b.jpg'
+    'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=2000', // Library
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', // Nature Lake
+    'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000', // Mountains
+    'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=2000', // Deep Forest
+    'https://images.unsplash.com/photo-1477346611705-65d1883cee1e?q=80&w=2000'  // Night Forest
   ];
   
   let currentImgIndex = 0;
@@ -190,7 +190,6 @@
     bgContainer.style.backgroundImage = `url('${images[currentImgIndex]}')`;
   }
 
-  // Timer Logic
   let defaultMins = 25;
   let timeLeft = defaultMins * 60;
   let timerId = null;
@@ -222,7 +221,7 @@
           updateDisplay();
         } else {
           clearInterval(timerId);
-          alert("Time's up!");
+          alert("Focus session complete!");
         }
       }, 1000);
       startBtn.textContent = 'Pause';
